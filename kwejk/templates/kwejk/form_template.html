@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <meta charset="utf-8">
+    <link href='http://fonts.googleapis.com/css?family=Slabo+27px&subset=latin-ext' rel='stylesheet' type='text/css'>
+    <style>
+        .wrapper{
+            margin-top:2%;
+        }
+        #galleries{
+            margin-top:2%;
+        }
+        .status-request-form{
+            display: none;
+        }
+        #form-request{
+            display:none;
+
+            padding-bottom:15px;
+        }
+        #form-request input{
+            width:25%;
+            margin-top:1%;
+        }
+        .head h1 {
+            font-family: 'Slabo 27px', serif;
+        }
+        h2.head{ font-family: 'Slabo 27px', serif;}
+        .center{
+            margin:auto;
+        }
+        footer{
+            font-family: 'Slabo 27px', serif;
+            font-size:1.5em;
+            color:white;
+            position:absolute;
+            bottom:0;
+            width:100%;
+            background-color:#16a085;
+            padding-top:4%;
+        }
+        .submit-button{
+            width:100%;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Usuwacz slajdów</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+<body>
+<section class="wrapper container">
+    <section class="center">
+    <header class="head"><h1>Usuwacz slajdów 1.0</h1></header>
+        <hr>
+    <p> Działa z Kwejkiem i bestami (na razie!)<br><a href="#" id="form-slidedown">Formularz do zaproponowania nowej strony <i class=" glyphicon glyphicon-menu-down"></i></a></p>
+<form id="form-request" class="form container" method="POST">
+ <div class="form-group request-form">
+{% for field in requestForm %}
+    {% if field.label == "Captcha" %}
+        Jeszcze tylko captcha
+        {{ field }}
+        <br>
+    {% else %}
+    {% csrf_token %}
+    <input type="text" class="form-control"
+            name="{{ field.name }}"
+            id="{{ field.name }}"
+            placeholder="{{ field.label }}">
+    {% endif %}
+    {% endfor %}
+<input class="btn submit-button" type="submit" value="Wyślij" />
+ </div>
+
+</form>
+    <div class="alert alert-success alert-dismissible status-request-form" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+ Wysłano!
+</div>
+        <form action="out" class="form" method="get">
+{% for field in form %}
+    <input type="text" class="form-control"
+            name="{{ field.name }}"
+            id="{{ field.name }}"
+            placeholder="{{ field.label }}" required>
+    {% endfor %}
+
+{% if status == '0' %}
+    <br>
+<div class="alert alert-warning alert-dismissible" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <strong>Błąd!</strong>Podałeś zły url, strony zmieniły swój układ, lub coś innego poszło nie tak!
+</div>
+{% endif %}
+<br>
+    <input class="btn btn-primary submit-button" type="submit" value="Wyślij" />
+</form>
+        </section>
+<!--------- Lista galerii wygenerowanych ---------------->
+<h2 class="head">Ostatnio wygenerowane</h2>
+<section id="galleries">
+
+
+</section>
+    </section>
+<footer>
+    <p class="container">Postawione na django i boostrapie</p>
+</footer>
+<script language="JavaScript">
+    function sendAjax(object){
+        $.ajax({ // create an AJAX call...
+                data: $(object).serialize(), // get the form data
+                type: $(object).attr('method'), // GET or POST
+                url: '/send-request', // the file to call
+                success: function(response) { // on success..
+                    if (response=="Wysłano") {
+                        $('.status-request-form').toggle(); // update the DIV
+                    }
+                }
+            });
+    }
+    $(document).ready(function() {
+        $('#form-slidedown').click(function(){
+           $('#form-request').slideToggle();
+        });
+        $('#form-request').submit(function() { // catch the form's submit event
+            if ($("#id_captcha_1").value!=' '){
+            sendAjax($('#form-request'));
+              $form = $(this).parents('form');
+
+    $.getJSON($(this).data('url'), {}, function(json) {
+        // This should update your captcha image src and captcha hidden input
+    });
+            return false;
+        }});
+    });
+</script>
+
+ <script>
+   var startIndex=0
+   var amount=2;
+   $(window).scroll(function() {
+        clearTimeout($.data(this, 'scrollTimer'));
+        $.data(this, 'scrollTimer', setTimeout(function() {
+            if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+                $.get(
+                    "/loadmore",
+                    {
+                     amount: amount, start: startIndex
+                    },
+                    function(data){
+                        $("#galleries").append(data)
+                    }
+                );
+        startIndex=startIndex+amount;
+
+   }
+       //placeholder
+    }, 250));
+});
+        $(document).ready(function(){
+                   $.get(
+    "/loadmore",
+    {
+        amount:15,
+        start: 0
+    },
+    function(data){
+       $("#galleries").append(data)
+    }
+);
+            startIndex=startIndex+5;
+            });
+    </script>
+</body>
+</html>
